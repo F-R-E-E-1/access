@@ -20,7 +20,7 @@
             <el-dropdown-item>公司主页</el-dropdown-item>
           </a>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">注销t</span>
+            <span style="display:block;">注销</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>

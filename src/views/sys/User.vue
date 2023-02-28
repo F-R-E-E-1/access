@@ -9,7 +9,7 @@
           <el-button @click="getUserList" type="primary" round icon="el-icon-search">查询</el-button>
         </el-col>
         <el-col :span="4" align="right">
-          <el-button @click="openEditUI" type="primary" icon="el-icon-plus" circle></el-button>
+          <el-button @click="openEditUI(null)" type="primary" icon="el-icon-plus" circle></el-button>
         </el-col>
       </el-row>
     </el-card>
@@ -37,7 +37,7 @@
         <el-table-column prop="status" label="用户状态" >
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status == 1">正常</el-tag>
-            <el-tag type="danger" scope.row.status != 1>禁用</el-tag>
+            <el-tag type="danger" v-if="scope.row.status != 1">禁用</el-tag>
           </template>
         </el-table-column>
 
@@ -45,7 +45,10 @@
 
         </el-table-column>
         <el-table-column label="操作" width="180">
-
+          <template slot-scope="scope">
+            <el-button @click="openEditUI(scope.row.id)" type="primary" icon="el-icon-edit" size="mini" circle></el-button>
+            <el-button type="danger" icon="el-icon-delete" size="mini" circle></el-button>
+          </template>
         </el-table-column>
       </el-table>
     </el-card>
@@ -67,7 +70,7 @@
           <el-input v-model="userForm.username" autocomplete="off"></el-input>
         </el-form-item>
 
-        <el-form-item label="登录密码" prop="password" :label-width="formLabelWidth">
+        <el-form-item v-if="userForm.id == null || userForm.id == undefined" label="登录密码" prop="password" :label-width="formLabelWidth">
           <el-input type="password" v-model="userForm.password" autocomplete="off"></el-input>
         </el-form-item>
 
@@ -151,8 +154,17 @@ export default {
         this.total = response.data.total
       })
     },
-    openEditUI() {
-      this.title = '新增用户'
+    openEditUI(id) {
+      if (id == null) {
+        this.title = '新增用户'
+      } else {
+        this.title = '修改用户'
+        // 根据ID查询用户数据
+        userAPI.getUserById(id).then(response => {
+          // 把数据放进form表单
+          this.userForm = response.data
+        })
+      }
       this.dialogFormVisible = true
     },
     clearForm() {
@@ -166,7 +178,7 @@ export default {
       this.$refs.userFormRef.validate((valid) => {
         if (valid) {
           // 提交请求给后台
-          userAPI.addUser(this.userForm).then(response => {
+          userAPI.saveUser(this.userForm).then(response => {
             // 成功提示
             this.$message({
               message: response.message,

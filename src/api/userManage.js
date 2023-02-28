@@ -19,5 +19,27 @@ export default {
       method: 'post',
       data: user
     })
+  },
+  getUserById(id) {
+    return request({
+      // url: '/user/' + id,
+      url: `/user/${id}`,
+      method: 'get'
+    })
+  },
+  saveUser(user) {
+    if (user.id == null || user.id == undefined) {
+      // 不满足就是新增
+      return this.addUser(user)
+    } else {
+      return this.updateUser(user)
+    }
+  },
+  updateUser(user) {
+    return request({
+      url: '/user',
+      method: 'put',
+      data: user
+    })
   }
 }

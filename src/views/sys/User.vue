@@ -33,6 +33,14 @@
         <el-table-column prop="phone" label="电话" width="180">
 
         </el-table-column>
+
+        <el-table-column prop="status" label="用户状态" >
+          <template slot-scope="scope">
+            <el-tag v-if="scope.row.status == 1">正常</el-tag>
+            <el-tag type="danger" scope.row.status != 1>禁用</el-tag>
+          </template>
+        </el-table-column>
+
         <el-table-column prop="email" label="电子邮箱" >
 
         </el-table-column>
@@ -54,7 +62,7 @@
 
     <!-- 用户信息编辑对话框 -->
     <el-dialog @close="clearForm" :title="title" :visible.sync="dialogFormVisible">
-      <el-form :model="userForm" :rules="rules">
+      <el-form :model="userForm" ref="userFormRef" :rules="rules">
         <el-form-item label="用户名" prop="username" :label-width="formLabelWidth">
           <el-input v-model="userForm.username" autocomplete="off"></el-input>
         </el-form-item>
@@ -83,7 +91,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="saveUser">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -99,7 +107,7 @@ export default {
       if (!reg.test(value)) {
         return callback(new Error('邮箱格式错误'))
       }
-      callback();
+      callback()
     }
     return {
       formLabelWidth: '130px',
@@ -150,6 +158,30 @@ export default {
     clearForm() {
       // 关闭表单后清空表单内容
       this.userForm = {}
+      // 关闭表单后清除校验结果
+      this.$refs.userFormRef.clearValidate()
+    },
+    saveUser() {
+      // 触发表单验证
+      this.$refs.userFormRef.validate((valid) => {
+        if (valid) {
+          // 提交请求给后台
+          userAPI.addUser(this.userForm).then(response => {
+            // 成功提示
+            this.$message({
+              message: response.message,
+              type: 'success'
+            })
+            // 关闭对话框
+            this.dialogFormVisible = false
+            // 刷新表格数据
+            this.getUserList()
+          })
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
     }
   },
   created() {

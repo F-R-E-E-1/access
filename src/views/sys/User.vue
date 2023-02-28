@@ -53,13 +53,13 @@
     </el-pagination>
 
     <!-- 用户信息编辑对话框 -->
-    <el-dialog :title="title" :visible.sync="dialogFormVisible">
-      <el-form :model="userForm">
-        <el-form-item label="用户名" :label-width="formLabelWidth">
+    <el-dialog @close="clearForm" :title="title" :visible.sync="dialogFormVisible">
+      <el-form :model="userForm" :rules="rules">
+        <el-form-item label="用户名" prop="username" :label-width="formLabelWidth">
           <el-input v-model="userForm.username" autocomplete="off"></el-input>
         </el-form-item>
 
-        <el-form-item label="登录密码" :label-width="formLabelWidth">
+        <el-form-item label="登录密码" prop="password" :label-width="formLabelWidth">
           <el-input type="password" v-model="userForm.password" autocomplete="off"></el-input>
         </el-form-item>
 
@@ -76,10 +76,9 @@
           </el-switch>
         </el-form-item>
 
-        <el-form-item label="电子邮件" :label-width="formLabelWidth">
+        <el-form-item label="电子邮件" prop="email" :label-width="formLabelWidth">
           <el-input v-model="userForm.email" autocomplete="off"></el-input>
         </el-form-item>
-
 
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -95,6 +94,13 @@ import userAPI from '@/api/userManage'
 export default {
   name: "User",
   data() {
+    var checkEmail = (rule, value, callback) => {
+      var reg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
+      if (!reg.test(value)) {
+        return callback(new Error('邮箱格式错误'))
+      }
+      callback();
+    }
     return {
       formLabelWidth: '130px',
       userForm: {},
@@ -105,7 +111,21 @@ export default {
         pageNo: 1,
         pageSize: 10
       },
-      userList: []
+      userList: [],
+      rules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 50, message: '长度在 3 到 50 个字符', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入初始登录密码', trigger: 'blur' },
+          { min: 3, max: 50, message: '长度在 6 到 16 个字符', trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: '请输入电子邮箱', trigger: 'blur' },
+          { validator: checkEmail, trigger: 'blur' }
+        ]
+      }
     }
   },
   methods: {
@@ -123,9 +143,13 @@ export default {
         this.total = response.data.total
       })
     },
-    openEditUI(){
+    openEditUI() {
       this.title = '新增用户'
       this.dialogFormVisible = true
+    },
+    clearForm() {
+      // 关闭表单后清空表单内容
+      this.userForm = {}
     }
   },
   created() {

@@ -4,9 +4,9 @@
     <el-card id="search">
       <el-row>
         <el-col :span="20">
-          <el-input v-model="searchModel.username" placeholder="用户名"></el-input>
-          <el-input v-model="searchModel.phone" placeholder="电话"></el-input>
-          <el-button type="primary" round icon="el-icon-search">查询</el-button>
+          <el-input v-model="searchModel.username" placeholder="用户名" clearable></el-input>
+          <el-input v-model="searchModel.phone" placeholder="电话" clearable></el-input>
+          <el-button @click="getUserList" type="primary" round icon="el-icon-search">查询</el-button>
         </el-col>
         <el-col :span="4" align="right">
           <el-button type="primary" icon="el-icon-plus" circle></el-button>
@@ -16,7 +16,12 @@
     <!--  结果列表  -->
     <el-card>
       <el-table :data="userList" stripe style="width: 100%">
-        <el-table-column type="index" label="#" width="80">
+        <el-table-column label="#" width="80">
+          <template slot-scope="scope">
+            <!--     (pageNo-1) * pageSize + index + 1      -->
+            <!--     添加一个插槽用于获取索引  -->
+            {{(searchModel.pageNo-1) * searchModel.pageSize + scope.$index + 1}}
+          </template>
 
         </el-table-column>
         <el-table-column prop="id" label="用户ID" width="180">
@@ -50,25 +55,37 @@
 </template>
 
 <script>
+import userAPI from '@/api/userManage'
 export default {
   name: "User",
   data() {
     return {
-      total:0,
+      total: 0,
       searchModel: {
         pageNo: 1,
         pageSize: 10
       },
-      userList:[]
+      userList: []
     }
   },
-  methods:{
-    handleSizeChange(){
-
+  methods: {
+    handleSizeChange(pageSize) {
+      this.searchModel.pageSize = pageSize
+      this.getUserList()
     },
-    handleCurrentChange(){
-
+    handleCurrentChange(pageNo) {
+      this.searchModel.pageNo = pageNo
+      this.getUserList()
+    },
+    getUserList() {
+      userAPI.getUserList(this.searchModel).then(response => {
+        this.userList = response.data.rows
+        this.total = response.data.total
+      })
     }
+  },
+  created() {
+    this.getUserList()
   }
 }
 </script>

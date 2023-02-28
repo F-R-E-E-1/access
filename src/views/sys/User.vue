@@ -9,7 +9,7 @@
           <el-button @click="getUserList" type="primary" round icon="el-icon-search">查询</el-button>
         </el-col>
         <el-col :span="4" align="right">
-          <el-button type="primary" icon="el-icon-plus" circle></el-button>
+          <el-button @click="openEditUI" type="primary" icon="el-icon-plus" circle></el-button>
         </el-col>
       </el-row>
     </el-card>
@@ -51,6 +51,42 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="400">
     </el-pagination>
+
+    <!-- 用户信息编辑对话框 -->
+    <el-dialog :title="title" :visible.sync="dialogFormVisible">
+      <el-form :model="userForm">
+        <el-form-item label="用户名" :label-width="formLabelWidth">
+          <el-input v-model="userForm.username" autocomplete="off"></el-input>
+        </el-form-item>
+
+        <el-form-item label="登录密码" :label-width="formLabelWidth">
+          <el-input type="password" v-model="userForm.password" autocomplete="off"></el-input>
+        </el-form-item>
+
+        <el-form-item label="联系电话" :label-width="formLabelWidth">
+          <el-input v-model="userForm.phone" autocomplete="off"></el-input>
+        </el-form-item>
+
+        <el-form-item label="用户状态" :label-width="formLabelWidth">
+          <el-switch
+            v-model="userForm.status"
+            :active-value="1"
+            :inactive-value="0"
+          >
+          </el-switch>
+        </el-form-item>
+
+        <el-form-item label="电子邮件" :label-width="formLabelWidth">
+          <el-input v-model="userForm.email" autocomplete="off"></el-input>
+        </el-form-item>
+
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -60,6 +96,10 @@ export default {
   name: "User",
   data() {
     return {
+      formLabelWidth: '130px',
+      userForm: {},
+      dialogFormVisible: false,
+      title: null,
       total: 0,
       searchModel: {
         pageNo: 1,
@@ -82,6 +122,10 @@ export default {
         this.userList = response.data.rows
         this.total = response.data.total
       })
+    },
+    openEditUI(){
+      this.title = '新增用户'
+      this.dialogFormVisible = true
     }
   },
   created() {
@@ -94,5 +138,8 @@ export default {
 #search .el-input {
   width: 200px;
   margin-right: 10px;
+}
+.el-dialog .el-input{
+  width: 80%;
 }
 </style>

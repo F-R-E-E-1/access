@@ -41,5 +41,11 @@ export default {
       method: 'put',
       data: user
     })
+  },
+  deletedUserById(id) {
+    return request({
+      url: `/user/${id}`,
+      method: 'delete',
+    })
   }
 }
